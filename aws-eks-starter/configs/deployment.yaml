@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-2048
+  namespace: game-2048
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: game-2048
+  template:
+    metadata:
+      labels:
+        app: game-2048
+    spec:
+      containers:
+      - image: public.ecr.aws/l6m2t8p7/eks-2048:latest
+        name: game-2048
+        ports:
+        - containerPort: 80
