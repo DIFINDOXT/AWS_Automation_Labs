@@ -138,14 +138,14 @@ ssh -i ~/aws-login.pem ubuntu@10.0.21.100
 On each private EC2:
 
 cd ~
-printf '<h1>Instance A ✅</h1><p>Private EC2 A on :8000</p>' > index.html    # (A)
-# For the second instance, change text to Instance B
-# printf '<h1>Instance B ✅</h1><p>Private EC2 B on :8000</p>' > index.html
+printf '<h4>Instance A ✅</h4><p>Private EC2 A on :8000</p>' > index.html    # (A)
+#### For the second instance, change text to Instance B
+#### printf '<h4>Instance B ✅</h4><p>Private EC2 B on :8000</p>' > index.html
 
-# start simple web server
+#### start simple web server
 python3 -m http.server 8000
-# If "Address already in use", find & kill:
-# lsof -i:8000 ; kill -9 <PID>
+#### If "Address already in use", find & kill:
+#### lsof -i:8000 ; kill -9 <PID>
 
 ---
 
