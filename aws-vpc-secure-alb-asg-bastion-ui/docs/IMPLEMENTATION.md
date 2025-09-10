@@ -34,10 +34,10 @@ This guide reproduces the project exactly as we did it on the AWS Console:
    - Private route tables → `0.0.0.0/0` via **NAT Gateway(s)**
 
 📸 
-![VPC Created](../screenshots/01-vpc-created.png)  
-![Subnets](../screenshots/02-subnets.png)  
-![IGW Attached](../screenshots/03-igw-attach.png)  
-![Route Tables](../screenshots/04-route-tables.png)  
+![VPC Created](../screenshots/01-vpc-created.png) 
+![Subnets](../screenshots/02-subnets.png) 
+![IGW Attached](../screenshots/03-igw-attach.png) 
+![Route Tables](../screenshots/04-route-tables.png) 
 ![NAT Gateways](../screenshots/05-nat-gateway.png)
 
 ---
@@ -176,3 +176,81 @@ python3 -m http.server 8000
 **If you prefer port 80, you can create a listener on 80 and forward to TG:8000; we used 8000 → 8000 to match the demo and screenshots.**
 
 ---
+## 10) Verify Application
+
+- Copy the **ALB DNS name** and open:http://<ALB-DNS>:8000
+
+- Refresh → responses alternate between **Instance A** and **Instance B**. 
+- If one instance is unhealthy:
+- Ensure `/index.html` is served on port **8000**.
+- Security Group (private) must allow 8000 **from SG-alb**.
+- Health check path = `/index.html`.
+- On instance, verify:
+  ```bash
+  curl http://localhost:8000/index.html
+  ```
+📸
+
+---
+
+## 11) (Optional) Attach ASG ↔ Target Group
+
+- For auto-registration of ASG instances:
+- Go to **ASG → Edit → Attach Target Group**.
+- Keep `Desired = 2` for demo.
+📸
+
+---
+
+## 12) Troubleshooting Quick Refs
+
+- **Key permission error** (scp/ssh): 
+```
+chmod 600 ~/aws-login.pem
+```
+
+# Port 8000 busy:
+lsof -i:8000
+kill -9 <PID>
+
+# Targets unhealthy:
+- Correct health path (/index.html)
+- SG rules permit 8000
+- App running on 0.0.0.0:8000
+
+# Instances keep re-creating:
+- Set ASG Desired/Min/Max = 0
+- Delete ASG → terminate instances
+
+# Cleanup order:
+ALB → Target Groups → EC2 → NAT → EIP → IGW → Route Tables → NACLs → Subnets → VPC
+📸
+
+---
+
+## 13) Final Demo
+
+- Both instances healthy in Target Group
+- ALB listener → HTTP:8000
+- Browser refresh alternates between Instance A & B
+📸
+
+---
+
+## Appendix – Useful Commands
+
+- From laptop → Bastion:
+```
+scp -i ~/.ssh/aws-login.pem ~/.ssh/aws-login.pem ubuntu@<BASTION_PUBLIC_IP>:/home/ubuntu/
+ssh -i ~/.ssh/aws-login.pem ubuntu@<BASTION_PUBLIC_IP>
+```
+
+From Bastion → Private Instance:
+```
+ssh -i ~/aws-login.pem ubuntu@<PRIVATE_IP>
+```
+
+On instance: run server
+```
+python3 -m http.server 8000
+```
