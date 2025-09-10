@@ -34,11 +34,8 @@ This guide reproduces the project exactly as we did it on the AWS Console:
    - Private route tables → `0.0.0.0/0` via **NAT Gateway(s)**
 
 📸 
-![VPC Created](../screenshots/01-vpc-created.png) 
-![Subnets](../screenshots/02-subnets.png) 
-![IGW Attached](../screenshots/03-igw-attach.png) 
-![Route Tables](../screenshots/04-route-tables.png) 
-![NAT Gateways](../screenshots/05-nat-gateway.png)
+![VPC Created](../screenshots/vpc-creation.png) 
+![Route Tables](../screenshots/vpc-routetables-subnets.png) 
 
 ---
 
@@ -58,7 +55,7 @@ Create three SGs in this VPC:
   - Outbound: All
 
 📸 
-![Security Groups](../screenshots/06-security-groups.png)
+![Security Groups](../screenshots/vpc-routetables-subnets.png)
 
 ---
 
@@ -72,7 +69,7 @@ Create three SGs in this VPC:
 - **Do not** lock subnet here (ASG sets it)
 
 📸 
-![Launch Template](../screenshots/07-launch-template.png)
+![Launch Template](../screenshots/Bastion-Private-subnet1.png)
 
 ---
 
@@ -88,8 +85,7 @@ Create three SGs in this VPC:
 - Create ASG → verify **2 instances** running in **private** subnets (no public IPs)
 
 📸 
-![ASG Created](../screenshots/08-asg-created.png)  
-![Private Instances](../screenshots/09-private-ec2s.png)
+![ASG Created](../screenshots/ec2-autoscaling_groups_success.png)  
 
 ---
 
@@ -105,7 +101,8 @@ Create three SGs in this VPC:
 - Launch and wait for **running** state
 
 📸 
-![Bastion Host](../screenshots/10-bastion-host.png)
+![Bastion Host](../screenshots/Bastion-Login.png)
+![Bastion Host having Pem file](../screenshots/Bastion-login-pem.png)
 
 ---
 
@@ -128,9 +125,9 @@ ssh -i ~/aws-login.pem ubuntu@10.0.21.100
 ```
 
 📸
+![Private EC2 logged in](../screenshots/Bastion-Private-subnet1.png)
 
 **Alternative (no key copy) is in docs/SSH_METHODS.md (ProxyJump), but we followed the trainer’s approach here.**
-
 ---
 
 ## 7) Deploy the app on both private EC2s (port 8000)
@@ -159,6 +156,7 @@ python3 -m http.server 8000
 - Register both private EC2s
 
 📸
+![Target Groups](../screenshots/Target_Groups-+bastion.png)
 
 ---
 
@@ -172,6 +170,7 @@ python3 -m http.server 8000
 - Wait until ALB = Active.
 
 📸
+![Load Balancer](../screenshots/Load_balancer.png)
 
 **If you prefer port 80, you can create a listener on 80 and forward to TG:8000; we used 8000 → 8000 to match the demo and screenshots.**
 
@@ -190,7 +189,8 @@ python3 -m http.server 8000
   curl http://localhost:8000/index.html
   ```
 📸
-
+![Unhealthy Nodes UI](../screenshots/Healthy-unhealthy-ui.png)
+![Unhealthy Nodes CLI](../screenshots/Healthy-unhealthy-cli.png)
 ---
 
 ## 11) (Optional) Attach ASG ↔ Target Group
@@ -198,7 +198,6 @@ python3 -m http.server 8000
 - For auto-registration of ASG instances:
 - Go to **ASG → Edit → Attach Target Group**.
 - Keep `Desired = 2` for demo.
-📸
 
 ---
 
@@ -218,13 +217,16 @@ kill -9 <PID>
 - SG rules permit 8000
 - App running on 0.0.0.0:8000
 
+📸
+![App running on 8000](../screenshots/Python-code-Private-subnetone.png)
+
 # Instances keep re-creating:
 - Set ASG Desired/Min/Max = 0
 - Delete ASG → terminate instances
 
 # Cleanup order:
 ALB → Target Groups → EC2 → NAT → EIP → IGW → Route Tables → NACLs → Subnets → VPC
-📸
+
 
 ---
 
@@ -233,7 +235,13 @@ ALB → Target Groups → EC2 → NAT → EIP → IGW → Route Tables → NACLs
 - Both instances healthy in Target Group
 - ALB listener → HTTP:8000
 - Browser refresh alternates between Instance A & B
+
 📸
+![App Running: CLI- Node:1](../screenshots/Success-cli.png)
+![App Running: UI- Node:1](../screenshots/Success-ui.png)
+
+![App Running: CLI- Node:2](../screenshots/Success-cli--2.png)
+![[App Running: UI- Node:1](../screenshots/Success-ui--2.png)
 
 ---
 
